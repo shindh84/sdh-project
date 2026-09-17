@@ -4,6 +4,7 @@ import { getCurrentUser, getExhibitById, getSignedPhotoUrl } from "@/lib/exhibit
 import { ExhibitView } from "@/components/exhibits/exhibit-view";
 import { Button } from "@/components/ui/button";
 import { DeleteExhibitButton } from "@/components/exhibits/delete-exhibit-button";
+import { ShareControl } from "@/components/exhibits/share-control";
 import { PencilIcon } from "lucide-react";
 
 export default async function ExhibitPage({
@@ -35,6 +36,7 @@ export default async function ExhibitPage({
       ownerActions={
         isOwner ? (
           <>
+            <ShareControl exhibitId={exhibit.id} visibility={exhibit.visibility} />
             <Button
               variant="secondary"
               size="sm"

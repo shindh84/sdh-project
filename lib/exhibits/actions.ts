@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { generateExhibitCopy, type ExhibitCopy } from "@/lib/ai/generate-exhibit-copy";
-import { DEFAULT_PHOTO_CROP, type Mood, type PhotoCrop } from "@/lib/exhibits/types";
+import { DEFAULT_PHOTO_CROP, type Mood, type PhotoCrop, type Visibility } from "@/lib/exhibits/types";
 
 async function requireUserId() {
   const supabase = await createClient();
@@ -117,6 +117,27 @@ export async function updateExhibitAction(
 
   if (error || !data) {
     return { ok: false, error: "수정 권한이 없거나 저장에 실패했습니다." };
+  }
+
+  return { ok: true };
+}
+
+export async function setVisibilityAction(
+  id: string,
+  visibility: Visibility,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  await requireUserId();
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("exhibits")
+    .update({ visibility })
+    .eq("id", id)
+    .select("id")
+    .maybeSingle();
+
+  if (error || !data) {
+    return { ok: false, error: "공개 범위를 바꾸지 못했습니다." };
   }
 
   return { ok: true };
