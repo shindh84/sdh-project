@@ -143,9 +143,16 @@ export async function setVisibilityAction(
   return { ok: true };
 }
 
-export async function deleteExhibitAction(id: string): Promise<void> {
+export async function deleteExhibitAction(
+  id: string,
+): Promise<{ ok: false; error: string } | void> {
   await requireUserId();
   const supabase = await createClient();
-  await supabase.from("exhibits").delete().eq("id", id);
+  const { error } = await supabase.from("exhibits").delete().eq("id", id);
+
+  if (error) {
+    return { ok: false, error: "삭제하지 못했습니다. 다시 시도해주세요." };
+  }
+
   redirect("/exhibits");
 }

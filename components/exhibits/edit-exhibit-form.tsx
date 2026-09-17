@@ -97,6 +97,7 @@ export function EditExhibitForm({
             id="photo"
             type="file"
             accept="image/*"
+            disabled={uploading}
             onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
           />
           <div className="mt-2 max-w-56">

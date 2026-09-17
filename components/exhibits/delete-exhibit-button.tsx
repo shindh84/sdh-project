@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import { toast } from "sonner";
 import { Trash2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,7 +37,14 @@ export function DeleteExhibitButton({ id }: { id: string }) {
           <AlertDialogCancel>취소</AlertDialogCancel>
           <AlertDialogAction
             disabled={isPending}
-            onClick={() => startTransition(() => deleteExhibitAction(id))}
+            onClick={() =>
+              startTransition(async () => {
+                const result = await deleteExhibitAction(id);
+                if (result && !result.ok) {
+                  toast.error(result.error);
+                }
+              })
+            }
           >
             삭제
           </AlertDialogAction>

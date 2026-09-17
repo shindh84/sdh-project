@@ -55,6 +55,7 @@ export function CreateExhibitWizard({ userId }: { userId: string }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [hasGenerated, setHasGenerated] = useState(false);
+  const [lastGeneratedMood, setLastGeneratedMood] = useState<Mood>(DEFAULT_MOOD);
 
   const [errors, setErrors] = useState<FieldErrors>({});
   const [isGenerating, startGenerateTransition] = useTransition();
@@ -92,6 +93,7 @@ export function CreateExhibitWizard({ userId }: { userId: string }) {
       setTitle(result.copy.titles[0]);
       setDescription(result.copy.description);
       setHasGenerated(true);
+      setLastGeneratedMood(moodToUse);
     });
   }
 
@@ -123,7 +125,7 @@ export function CreateExhibitWizard({ userId }: { userId: string }) {
         photoCrop: crop,
         itemName,
         story,
-        mood,
+        mood: lastGeneratedMood,
         title,
         description,
         showStory,
@@ -147,6 +149,7 @@ export function CreateExhibitWizard({ userId }: { userId: string }) {
             type="file"
             accept="image/*"
             ref={fileInputRef}
+            disabled={uploading}
             aria-invalid={!!errors.photo}
             onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
           />
