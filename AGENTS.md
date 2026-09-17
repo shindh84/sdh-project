@@ -32,6 +32,22 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - `skills update`는 복사 방식을 보존하지 않으므로 사용하지 않는다. `update --copy`도 대안으로 사용하지 않는다.
 - 이 정책은 업데이트된 `update-project-skills` 본문이 symlink를 요구하더라도 우선한다. 스킬을 직접 수정할 때도 두 복사본을 함께 반영하고, 완료 시 symlink가 없는지와 두 복사본의 파일 내용이 같은지 확인한다.
 
+# Supabase
+
+이 프로젝트의 DB, 인증, 파일 저장소는 Supabase를 사용한다.
+
+- Supabase 관련 작업을 시작하기 전에 공식 문서 색인 `https://supabase.com/llms.txt`를 가져와 해당 주제의 현재 문서를 확인한다. 저장소에 복사해 두지 않는다. 주요 경로는 Auth가 `https://supabase.com/docs/guides/auth.md`, Storage가 `https://supabase.com/docs/guides/storage.md`, Database가 `https://supabase.com/docs/guides/database.md`다.
+- 가져온 문서는 설치된 `@supabase/*` 패키지 버전과 대조한다. 문서와 설치 버전이 어긋나면 설치 버전을 기준으로 삼고 차이를 기록한다.
+- 초기 설정은 프로젝트에 설치된 `setup-supabase` 스킬을 따른다. 이 스킬은 `skills-lock.json`에 없는 프로젝트 로컬 스킬이고 Supabase가 배포한 공식 스킬이 아니므로, 공식 문서와 충돌하면 공식 문서를 우선한다.
+
+# AI 게이트웨이
+
+전시 문구 생성은 Vercel AI Gateway를 기본 경로로, OpenRouter를 대체 경로로 사용한다.
+
+- 관련 작업을 시작하기 전에 공식 문서 색인을 가져와 현재 문서를 확인한다. 저장소에 복사해 두지 않는다. Vercel은 `https://vercel.com/llms.txt`이고 AI Gateway 문서는 `https://vercel.com/docs/ai-gateway.md`에서 마크다운으로 받는다. OpenRouter는 `https://openrouter.ai/docs/llms.txt`다.
+- 가져온 문서는 설치된 SDK 버전과 대조한다. 어긋나면 설치 버전을 기준으로 삼고 차이를 기록한다.
+- 호출 형식과 모델 식별자는 기본 경로인 Vercel AI Gateway 문서를 기준으로 맞춘다. OpenRouter는 대체 경로로만 사용한다.
+
 # 검증·리뷰 예산
 
 강의용 학습 템플릿이다. 동작하는 결과물이 코드 완결성보다 우선하고, 품질은 런타임 검증(스펙의 흐름이 실제로 도는지)으로 증명한다. 스킬 본문이 더 강한 리뷰를 요구해도 이 예산이 우선한다.

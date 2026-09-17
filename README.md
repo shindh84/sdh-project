@@ -51,6 +51,12 @@ PLAYWRIGHT_CHROMIUM_PATH=/opt/pw-browsers/chromium bun run test:e2e
 
 `async` Server Component는 Vitest가 아직 지원하지 않으므로 E2E로 검증합니다.
 
+## 이 프로젝트 문서
+
+- 제품 정의: [PRODUCT.md](PRODUCT.md)
+- 현재 작업 단위: [docs/specs/create-and-share-exhibit/spec.md](docs/specs/create-and-share-exhibit/spec.md)와 그 아래 [tasks/01](docs/specs/create-and-share-exhibit/tasks/01-create-exhibit.md), [tasks/02](docs/specs/create-and-share-exhibit/tasks/02-share-exhibit.md)
+- 결정 계약 인덱스: [docs/decisions/README.md](docs/decisions/README.md)
+
 ## Claude Code 워크플로우
 
 ```mermaid
