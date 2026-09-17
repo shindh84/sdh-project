@@ -1,7 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { signInWithGoogleAction } from "@/lib/auth/actions";
+import { GoogleLoginButton } from "@/components/auth/google-login-button";
 import { TriangleAlertIcon } from "lucide-react";
 
 export default async function LoginPage({
@@ -26,11 +25,7 @@ export default async function LoginPage({
               <AlertDescription>다시 시도해주세요.</AlertDescription>
             </Alert>
           )}
-          <form action={signInWithGoogleAction.bind(null, next)}>
-            <Button type="submit" className="w-full">
-              Google로 계속하기
-            </Button>
-          </form>
+          <GoogleLoginButton next={next} />
         </CardContent>
       </Card>
     </div>
