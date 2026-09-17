@@ -8,6 +8,7 @@ import { uploadExhibitPhoto } from "@/lib/exhibits/photo-upload";
 import { updateExhibitAction } from "@/lib/exhibits/actions";
 import type { PhotoCrop } from "@/lib/exhibits/types";
 import { PhotoCropper } from "@/components/exhibits/photo-cropper";
+import { PhotoRetouch } from "@/components/exhibits/photo-retouch";
 import { ExhibitView } from "@/components/exhibits/exhibit-view";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,6 +50,10 @@ export function EditExhibitForm({
 
   const [photoPath, setPhotoPath] = useState(initialPhotoPath);
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState(initialPhotoUrl);
+  // 보정 후보와 비교·재시도할 수 있도록, 지금 화면에 있는 사진(기존 사진이든 새로 올린 사진이든)을
+  // 원본으로 기억해 둔다. 저장하기 전까지는 언제든 이 원본으로 되돌아갈 수 있다.
+  const [originalPhotoPath, setOriginalPhotoPath] = useState(initialPhotoPath);
+  const [originalPhotoPreviewUrl, setOriginalPhotoPreviewUrl] = useState(initialPhotoUrl);
   const [crop, setCrop] = useState<PhotoCrop>(initialCrop);
   const [uploading, setUploading] = useState(false);
 
@@ -57,9 +62,14 @@ export function EditExhibitForm({
   function handleFileChange(file: File | null) {
     if (!file) return;
     setUploading(true);
-    setPhotoPreviewUrl(URL.createObjectURL(file));
+    const previewUrl = URL.createObjectURL(file);
+    setPhotoPreviewUrl(previewUrl);
     uploadExhibitPhoto(supabase, userId, file)
-      .then((path) => setPhotoPath(path))
+      .then((path) => {
+        setPhotoPath(path);
+        setOriginalPhotoPath(path);
+        setOriginalPhotoPreviewUrl(previewUrl);
+      })
       .catch(() => toast.error("사진 업로드에 실패했습니다. 다시 시도해주세요."))
       .finally(() => setUploading(false));
   }
@@ -100,12 +110,23 @@ export function EditExhibitForm({
             disabled={uploading}
             onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
           />
-          <div className="mt-2 max-w-56">
+          <div className="mt-2 flex max-w-56 flex-col gap-2">
             <PhotoCropper imageSrc={photoPreviewUrl} crop={crop} onCropChange={setCrop} />
             {uploading && (
-              <p className="text-muted-foreground mt-1 flex items-center gap-1 text-xs">
+              <p className="text-muted-foreground flex items-center gap-1 text-xs">
                 <Spinner className="size-3" /> 업로드 중...
               </p>
+            )}
+            {!uploading && (
+              <PhotoRetouch
+                key={originalPhotoPath}
+                originalPhotoPath={originalPhotoPath}
+                originalPhotoUrl={originalPhotoPreviewUrl}
+                onSelect={(path, url) => {
+                  setPhotoPath(path);
+                  setPhotoPreviewUrl(url);
+                }}
+              />
             )}
           </div>
         </Field>

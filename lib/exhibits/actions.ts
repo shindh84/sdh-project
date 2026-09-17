@@ -3,6 +3,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { generateExhibitCopy, type ExhibitCopy } from "@/lib/ai/generate-exhibit-copy";
+import { retouchExhibitPhoto } from "@/lib/ai/retouch-exhibit-photo";
+import { getSignedPhotoUrl } from "@/lib/exhibits/queries";
 import { DEFAULT_PHOTO_CROP, type Mood, type PhotoCrop, type Visibility } from "@/lib/exhibits/types";
 
 async function requireUserId() {
@@ -38,6 +40,65 @@ export async function generateCopyAction(
     return {
       ok: false,
       error: "문구 생성에 실패했습니다. 입력한 내용은 그대로 남아있으니 다시 시도해주세요.",
+    };
+  }
+}
+
+export type RetouchPhotoResult =
+  | { ok: true; photoPath: string; photoUrl: string; styleLabel: string }
+  | { ok: false; error: string };
+
+// retouch-exhibit-photo 스펙: 원본 사진은 그대로 두고, 보정 결과를 새 파일로 만들어 돌려준다.
+// 어느 쪽을 쓸지는 사용자가 미리보기에서 고른다.
+export async function retouchExhibitPhotoAction(
+  originalPhotoPath: string,
+): Promise<RetouchPhotoResult> {
+  const ownerId = await requireUserId();
+  const supabase = await createClient();
+
+  const { data: original, error: downloadError } = await supabase.storage
+    .from("exhibit-photos")
+    .download(originalPhotoPath);
+
+  if (downloadError || !original) {
+    return { ok: false, error: "원본 사진을 불러오지 못했습니다. 다시 시도해주세요." };
+  }
+
+  try {
+    const mediaType = original.type || "image/jpeg";
+    const imageBytes = new Uint8Array(await original.arrayBuffer());
+
+    const retouched = await retouchExhibitPhoto({ imageBytes, mediaType });
+    const ext = retouched.mediaType.split("/")[1] || "png";
+    const newPath = `${ownerId}/${crypto.randomUUID()}.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("exhibit-photos")
+      .upload(newPath, Buffer.from(retouched.imageBytes), {
+        contentType: retouched.mediaType,
+        upsert: false,
+      });
+
+    if (uploadError) {
+      return { ok: false, error: "보정 결과를 저장하지 못했습니다. 다시 시도해주세요." };
+    }
+
+    const photoUrl = await getSignedPhotoUrl(newPath);
+    if (!photoUrl) {
+      return { ok: false, error: "보정 결과를 불러오지 못했습니다. 다시 시도해주세요." };
+    }
+
+    return {
+      ok: true,
+      photoPath: newPath,
+      photoUrl,
+      styleLabel: retouched.styleLabel,
+    };
+  } catch (error) {
+    console.error("retouchExhibitPhotoAction failed:", error);
+    return {
+      ok: false,
+      error: "사진 보정에 실패했습니다. 원본 사진은 그대로 있으니 다시 시도해주세요.",
     };
   }
 }
